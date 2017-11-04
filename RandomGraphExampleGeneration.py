@@ -1,4 +1,5 @@
 from random import *
+from copy import deepcopy
 """
 1. empty graph
 2. for num of verts uniformly pick one permutation of the verts
@@ -73,14 +74,26 @@ class Graph(object):
 
     def addEdgeByNode(self,edge):
         #edge is a set of 2 instances of the GraphNode class
-        ordered_edge = list(edge)
-        for i in range(len(ordered_edge)):
-            current_node = ordered_edge[i]
-            other_node_idx = (i+1)%2
-            other_node = ordered_edge[other_node_idx]
-            current_node.addAdjNode(other_node)
+        [vert1,vert2] = edge
+        print("vert1 in self.nodes")
+        print(vert1 in self.nodes)
+        print("vert2 in self.nodes")
+        print(vert2 in self.nodes)
+        vert1.addAdjNode(vert2)
+        vert2.addAdjNode(vert1)
+        
 
     #def addEdgeByNodeData():
+    def printNodesDataToAdjSet(self):
+        node_data_to_adj_node_data = dict()
+        for node in self.nodes:
+            key = node.data
+            adj_nodes = node.getAdj()
+            val = []
+            for itm in adj_nodes:
+                val.append(itm.data)
+            node_data_to_adj_node_data[key] = val
+        print(node_data_to_adj_node_data)
 
 class GraphNode(object):
     def __init__(self,data,adj=None):
@@ -89,11 +102,15 @@ class GraphNode(object):
         self.data = data
         self.adj = adj
 
+    def getAdj(self):
+        return self.adj
+
     def addAdjNode(self,node):
         self.adj.append(node)
 
-def uniformly_chosen_perm_of_verts(verts):
+def uniformly_chosen_perm_of_verts(nodes):
     ordered_list = []
+    verts = [node for node in nodes]
     while len(verts) > 0:
        idx_of_vert_to_add = randint(0,len(verts)-1)
        vert_to_add = verts[idx_of_vert_to_add]
@@ -118,24 +135,39 @@ def constructPossibleStartVertsAndEndVertsExludingSomeEdgeSet(verts,edge_set):
     #then can make pairs of nodes with no duplicates easily by type of loop
     #written below ok but edge set can just be a set or bag as cs ppl say lol
     #with no duplicates
-    start_verts_to_end_verts = dict()
+    start_vert_to_end_verts = dict()
     #wait this might still be technically doing what I wanted to do.....
     #could take a while....
     #well i'll write and test
+   # print("len(verts) within constructPossibleStartVertsAndEndVertsExludingSomeEdgeSet method")
+   # print(len(verts))
     for i in range(len(verts)-1):
         val = []
         for j in range(i+1,len(verts)):
-            if set([verts[i],verts[j]]) not in edge_set:
-                val.append([verts[i],verts[j]])
-        start_verts_to_end_verts[verts[i]] = val
-    return start_verts_to_end_verts
+            if ([verts[i],verts[j]] not in edge_set) and ([verts[j],verts[i]] not in edge_set):
+                val.append(verts[j])
+        """
+        print("adding key to start_vert_to_end_verts")
+        print("key")
+        print(verts[i])
+        print("val")
+        print(val)
+        print("or by label rather than class instance....")
+        print("key by data")
+        print(verts[i].data)
+        print("val by data")
+        print([node.data for node in val])
+        """
+        start_vert_to_end_verts[verts[i]] = val
+    return start_vert_to_end_verts
 
-def constructStartVertArrayAndProbArray(start_verts_to_end_verts):
+def constructStartVertArrayAndProbArray(start_vert_to_end_verts):
     start_vert_arr = []
     prob_arr = []
     total_num_end_verts = 0
-    for start_vert:end_verts in start_vert_to_end_verts:
-        if size(end_verts) > 0:
+    for start_vert in start_vert_to_end_verts.keys():
+        end_verts = start_vert_to_end_verts[start_vert]
+        if len(end_verts) > 0:
             total_num_end_verts += len(end_verts)
             start_vert_arr.append(start_vert)
             prob_arr.append(len(end_verts))
@@ -145,11 +177,25 @@ def constructStartVertArrayAndProbArray(start_verts_to_end_verts):
 
 def chooseStartVertWItsProbability(start_vert_arr,prob_arr):
     randfloat = random()
+#    print("data of elts in start_vert_arr within chooseStartVertWItsProb method")
+#    for itm in start_vert_arr:
+#        print(itm.data)
+#    print()
+#    print("prob_arr")
+#    print(prob_arr)
+#    print("randfloat")
+#    print(randfloat)
+    prob_arr_sum = []
+    tally = 0
     for i in range(len(prob_arr)):
-        if randfloat < prob_arr[i]:
+        tally += prob_arr[i]
+        prob_arr_sum.append(tally)
+    for i in range(len(prob_arr_sum)):
+        if randfloat < prob_arr_sum[i]:
             return start_vert_arr[i]
 
 def chooseEndVertUniformly(start_vert,start_vert_to_end_verts):
+#    print(type(start_vert))
     end_verts = start_vert_to_end_verts[start_vert]
     rand_idx = randint(0,len(end_verts)-1)
     return end_verts[rand_idx]
@@ -159,7 +205,7 @@ def removeEdgeFromStartVertToEndVerts(start_vert_to_end_verts,edge):
     #it is guaranteed to be "in" startvertoendverts
     #need to remove it
     #so how?
-    ordered_edge = list(edge)
+    ordered_edge = edge
     start_vert = ordered_edge[0]
     if start_vert in start_vert_to_end_verts.keys():
         vals = start_vert_to_end_verts[start_vert]
@@ -172,46 +218,111 @@ def removeEdgeFromStartVertToEndVerts(start_vert_to_end_verts,edge):
         start_vert_to_end_verts[start_vert] = vals
     return start_vert_to_end_verts
     
-
+"""
 def UniformlyChooseFromPossibleEdgesNotInEdgeSet(verts,edge_set):
     start_vert_to_end_verts = constructPossibleStartVertsAndEndVertsExludingSomeEdgeSet(verts,edge_set)
     [start_vert_arr,prob_arr] = constructStartVertArrayAndProbArray(start_vert_to_end_verts)
     start_vert = chooseStartVertWItsProbability(start_vert_arr,prob_arr)
     end_vert = chooseEndVertUniformly(start_vert,start_vert_to_end_verts)
-    new_edge = set([start_vert,end_vert])
+    new_edge = [start_vert,end_vert]
     return new_edge
 
-###### wrote this method to overwrite (overload?) cant remember the previous one
-##### if something goes terribly wrong and this one doesn't work
-#### can go back to using above until get this working
-def UniformlyChooseFromPossibleEdgesNotInEdgeSet(verts,edge_set,start_vert_to_end_verts,last_edge_added):
-    if last_edge_added != None:
-        start_vert_to_end_verts = removeEdgeFromStartVertToEndVerts(start_vert_to_end_verts,last_edge_added)
+
+def UniformlyChooseFromPossibleEdgesNotInEdgeSet(verts,edge_set,graph):
+    start_vert_to_end_verts = constructPossibleStartVertsAndEndVertsExludingSomeEdgeSet(verts,edge_set)
     [start_vert_arr,prob_arr] = constructStartVertArrayAndProbArray(start_vert_to_end_verts)
     start_vert = chooseStartVertWItsProbability(start_vert_arr,prob_arr)
     end_vert = chooseEndVertUniformly(start_vert,start_vert_to_end_verts)
-    new_edge = set([start_vert,end_vert])
+    new_edge = [start_vert,end_vert]
+    return new_edge
+"""
+###### wrote this method to overwrite (overload?) cant remember the previous one
+##### if something goes terribly wrong and this one doesn't work
+#### can go back to using above until get this working
+def UniformlyChooseFromPossibleEdgesNotInEdgeSet(verts,edge_set,start_vert_to_end_verts,last_edge_added,graph):
+#    print("key data in uniformlychoosefrompossedgesnotinedgeset")
+#    print("before modifying dict.....")
+#    printKeyData(start_vert_to_end_verts)
+    if last_edge_added != None:
+        start_vert_to_end_verts = removeEdgeFromStartVertToEndVerts(start_vert_to_end_verts,last_edge_added)
+#    print("after modifying.....")
+#    printKeyData(start_vert_to_end_verts)
+#    print("num keys in start_vert_to_end_verts")
+
+#    print(len(start_vert_to_end_verts.keys()))
+    [start_vert_arr,prob_arr] = constructStartVertArrayAndProbArray(start_vert_to_end_verts)
+#    print("elt type for elt of start_vert_arr")
+#    for itm in start_vert_arr:
+
+#        print(type(itm))
+#    print()
+#    print("data of elts in start_vert_arr")
+#    for itm in start_vert_arr:
+#        print(itm.data)
+    #print()
+    for v in start_vert_arr:
+        print("v in graph.getNodes()")
+        print("(should be true)")
+        print(v in graph.getNodes())
+    start_vert = chooseStartVertWItsProbability(start_vert_arr,prob_arr)
+    #print("desired start_verts type")
+    #print(type(start_vert))
+    #print("desired start_vert's data")
+    #print(start_vert.data)
+    end_vert = chooseEndVertUniformly(start_vert,start_vert_to_end_verts)
+    new_edge = [start_vert,end_vert]
+    print("start_vert in graph.getNodes()")
+    print(start_vert in graph.getNodes())
+    print("end_vert in graph.getNodes()")
+    print(end_vert in graph.getNodes())
     return new_edge
 
+def printKeyData(start_vert_to_end_verts):
+    print("data of keys in start_vert_to_end_verts")
+    for key in start_vert_to_end_verts.keys():
+        print(key.data)
+    print()
+
+def printEdgeData(edge):
+    print("data in the end verts of this edge")
+    for vert in edge:
+        print(vert.data)
+
 def GenRandomGraphNNodes(num_nodes,num_edges):
+    #MUST HOLD: num_edges > num_nodes-1
+    if num_edges <= num_nodes -1:
+        print("Error!  We must have num_edges > num_nodes - 1")
+        return None
     g = Graph()
     for i in range(num_nodes):
         g.addNode(i)
     verts = g.getNodes()
+    #print("len(verts)")
+    #print(len(verts))
     random_perm = uniformly_chosen_perm_of_verts(verts)
-    edge_set = set([])
+    #print("len(verts) after calling uniform perm method")
+    #print(len(verts))
+    edge_set = []
     for i in range(len(random_perm)-1):
         start_vert = random_perm[i]
         end_vert = random_perm[i+1]
-        edge = set([start_vert,end_vert])
+        edge = [start_vert,end_vert]
         g.addEdgeByNode(edge)
-        edge_set.add(edge)
-    start_vert_to_end_verts =
+        edge_set.append(edge)
+    #print("len edge set")
+    #print(len(edge_set))
+    #print("len(verts) right before calling constructpossstartvertandendvertsexlcsomeedgeset method")
+    #print(len(verts))
+    start_vert_to_end_verts = constructPossibleStartVertsAndEndVertsExludingSomeEdgeSet(verts,edge_set)
+    #print("num keys in start_vert_to_end_verts right after constructing")
+    #print(len(start_vert_to_end_verts.keys()))
+#    printKeyData(start_vert_to_end_verts)
     last_edge_added = None
     for i in range(num_edges-num_nodes+1):
-        edge = UniformlyChooseFromPossibleEdgesNotInEdgeSet(verts,edge_set,start_vert_to_end_verts,last_edge_added)
+        edge = UniformlyChooseFromPossibleEdgesNotInEdgeSet(verts,edge_set,start_vert_to_end_verts,last_edge_added,g)
+        printEdgeData(edge)
         g.addEdgeByNode(edge)
-        edge_set.add(edge)
+        edge_set.append(edge)
         last_edge_added = edge
         #crap now that dict has changed
         #we can't choose with repetition
@@ -219,9 +330,11 @@ def GenRandomGraphNNodes(num_nodes,num_edges):
         #oh wait no we're good
         #it does that
         #if I wanted to optimize I really should not construct the dict
-        # start_verts_to_end_verts over and over but rather do it once
+        # start_vert_to_end_verts over and over but rather do it once
         #then remove stuff as needed
         #thats a lot of duplicated work
     return g
-    
 
+
+g = GenRandomGraphNNodes(5,7)
+g.printNodesDataToAdjSet()
