@@ -154,9 +154,40 @@ def chooseEndVertUniformly(start_vert,start_vert_to_end_verts):
     rand_idx = randint(0,len(end_verts)-1)
     return end_verts[rand_idx]
 
+def removeEdgeFromStartVertToEndVerts(start_vert_to_end_verts,edge):
+    #just added an edge
+    #it is guaranteed to be "in" startvertoendverts
+    #need to remove it
+    #so how?
+    ordered_edge = list(edge)
+    start_vert = ordered_edge[0]
+    if start_vert in start_vert_to_end_verts.keys():
+        vals = start_vert_to_end_verts[start_vert]
+        vals.remove(ordered_edge[1])
+        start_vert_to_end_verts[start_vert] = vals
+    else:
+        start_vert = ordered_edge[1]
+        vals = start_vert_to_end_verts[start_vert]
+        vals.remove(ordered_edge[0])
+        start_vert_to_end_verts[start_vert] = vals
+    return start_vert_to_end_verts
+    
+
 def UniformlyChooseFromPossibleEdgesNotInEdgeSet(verts,edge_set):
     start_vert_to_end_verts = constructPossibleStartVertsAndEndVertsExludingSomeEdgeSet(verts,edge_set)
-    [start_vert_arr,prob_arr] = constructStartVertArrayAndProbArray(start_verts_to_end_verts)
+    [start_vert_arr,prob_arr] = constructStartVertArrayAndProbArray(start_vert_to_end_verts)
+    start_vert = chooseStartVertWItsProbability(start_vert_arr,prob_arr)
+    end_vert = chooseEndVertUniformly(start_vert,start_vert_to_end_verts)
+    new_edge = set([start_vert,end_vert])
+    return new_edge
+
+###### wrote this method to overwrite (overload?) cant remember the previous one
+##### if something goes terribly wrong and this one doesn't work
+#### can go back to using above until get this working
+def UniformlyChooseFromPossibleEdgesNotInEdgeSet(verts,edge_set,start_vert_to_end_verts,last_edge_added):
+    if last_edge_added != None:
+        start_vert_to_end_verts = removeEdgeFromStartVertToEndVerts(start_vert_to_end_verts,last_edge_added)
+    [start_vert_arr,prob_arr] = constructStartVertArrayAndProbArray(start_vert_to_end_verts)
     start_vert = chooseStartVertWItsProbability(start_vert_arr,prob_arr)
     end_vert = chooseEndVertUniformly(start_vert,start_vert_to_end_verts)
     new_edge = set([start_vert,end_vert])
@@ -175,10 +206,13 @@ def GenRandomGraphNNodes(num_nodes,num_edges):
         edge = set([start_vert,end_vert])
         g.addEdgeByNode(edge)
         edge_set.add(edge)
+    start_vert_to_end_verts =
+    last_edge_added = None
     for i in range(num_edges-num_nodes+1):
-        edge = UniformlyChooseFromPossibleEdgesNotInEdgeSet(verts,edge_set)
+        edge = UniformlyChooseFromPossibleEdgesNotInEdgeSet(verts,edge_set,start_vert_to_end_verts,last_edge_added)
         g.addEdgeByNode(edge)
         edge_set.add(edge)
+        last_edge_added = edge
         #crap now that dict has changed
         #we can't choose with repetition
         #shit everything needs to be updated
@@ -190,3 +224,4 @@ def GenRandomGraphNNodes(num_nodes,num_edges):
         #thats a lot of duplicated work
     return g
     
+
