@@ -6,7 +6,7 @@ which is written p_0,p_1,p_2,p_3...p_(n-1)
 3. for each i in range(n-1):
     add edge between [p_i and p_(i-1)]
 4. choose uniformly m-n+1 edges to add from set of ((possible edges among verts) - (edges already included))
-
+5. add them
 
 2. just figured out how
 start with list of all verts
@@ -44,14 +44,57 @@ to avoid duplicates make the start vert the smaller one
 
    
 """
-verts = graph.nodes
+
+"""
+TODO:
+test!
+
+way to optimize:
+there is repeated work in constructing the hashmap start_vert_to_end_verts
+over and over
+should modify code so that it is only constructed once and then has stuff
+deleted as we go rather than re constructed so many times
+"""
+
+
+class Graph(object):
+    def __init__(self,nodes=None):
+        if nodes == None:
+            nodes = []
+        self.nodes = nodes
+
+    def getNodes(self):
+        return self.nodes
+
+    def addNode(self,data):
+        new_node = GraphNode(data)
+        if new_node not in self.nodes:
+            self.nodes.append(new_node)
+
+    def addEdgeByNode(self,edge):
+        #edge is a set of 2 instances of the GraphNode class
+        ordered_edge = list(edge)
+        for i in range(len(ordered_edge)):
+            current_node = ordered_edge[i]
+            other_node_idx = (i+1)%2
+            other_node = ordered_edge[other_node_idx]
+            current_node.addAdjNode(other_node)
+
+    #def addEdgeByNodeData():
+
+class GraphNode(object):
+    def __init__(self,data,adj=None):
+        if adj == None:
+            adj = []
+        self.data = data
+        self.adj = adj
+
+    def addAdjNode(self,node):
+        self.adj.append(node)
 
 def uniformly_chosen_perm_of_verts(verts):
     ordered_list = []
     while len(verts) > 0:
-        # 0 might be wrong
-       #n wont actually run will go up to n-1
-       #indexing for me will start at 0
        idx_of_vert_to_add = randint(0,len(verts)-1)
        vert_to_add = verts[idx_of_vert_to_add]
        ordered_list.append(vert_to_add)
@@ -119,4 +162,31 @@ def UniformlyChooseFromPossibleEdgesNotInEdgeSet(verts,edge_set):
     new_edge = set([start_vert,end_vert])
     return new_edge
 
-print(uniformly_chosen_perm_of_verts(verts))
+def GenRandomGraphNNodes(num_nodes,num_edges):
+    g = Graph()
+    for i in range(num_nodes):
+        g.addNode(i)
+    verts = g.getNodes()
+    random_perm = uniformly_chosen_perm_of_verts(verts)
+    edge_set = set([])
+    for i in range(len(random_perm)-1):
+        start_vert = random_perm[i]
+        end_vert = random_perm[i+1]
+        edge = set([start_vert,end_vert])
+        g.addEdgeByNode(edge)
+        edge_set.add(edge)
+    for i in range(num_edges-num_nodes+1):
+        edge = UniformlyChooseFromPossibleEdgesNotInEdgeSet(verts,edge_set)
+        g.addEdgeByNode(edge)
+        edge_set.add(edge)
+        #crap now that dict has changed
+        #we can't choose with repetition
+        #shit everything needs to be updated
+        #oh wait no we're good
+        #it does that
+        #if I wanted to optimize I really should not construct the dict
+        # start_verts_to_end_verts over and over but rather do it once
+        #then remove stuff as needed
+        #thats a lot of duplicated work
+    return g
+    
