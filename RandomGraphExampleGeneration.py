@@ -1,5 +1,7 @@
 from random import *
 from copy import deepcopy
+from datetime import datetime
+
 """
 1. empty graph
 2. for num of verts uniformly pick one permutation of the verts
@@ -63,6 +65,7 @@ class Graph(object):
         if nodes == None:
             nodes = []
         self.nodes = nodes
+        self.num_edges = 0
 
     def getNodes(self):
         return self.nodes
@@ -75,12 +78,13 @@ class Graph(object):
     def addEdgeByNode(self,edge):
         #edge is a set of 2 instances of the GraphNode class
         [vert1,vert2] = edge
-        print("vert1 in self.nodes")
-        print(vert1 in self.nodes)
-        print("vert2 in self.nodes")
-        print(vert2 in self.nodes)
+        #print("vert1 in self.nodes")
+        #print(vert1 in self.nodes)
+        #print("vert2 in self.nodes")
+        #print(vert2 in self.nodes)
         vert1.addAdjNode(vert2)
         vert2.addAdjNode(vert1)
+        self.num_edges += 1
         
 
     #def addEdgeByNodeData():
@@ -260,10 +264,10 @@ def UniformlyChooseFromPossibleEdgesNotInEdgeSet(verts,edge_set,start_vert_to_en
 #    for itm in start_vert_arr:
 #        print(itm.data)
     #print()
-    for v in start_vert_arr:
-        print("v in graph.getNodes()")
-        print("(should be true)")
-        print(v in graph.getNodes())
+    #for v in start_vert_arr:
+#        print("v in graph.getNodes()")
+#        print("(should be true)")
+#        print(v in graph.getNodes())
     start_vert = chooseStartVertWItsProbability(start_vert_arr,prob_arr)
     #print("desired start_verts type")
     #print(type(start_vert))
@@ -271,10 +275,10 @@ def UniformlyChooseFromPossibleEdgesNotInEdgeSet(verts,edge_set,start_vert_to_en
     #print(start_vert.data)
     end_vert = chooseEndVertUniformly(start_vert,start_vert_to_end_verts)
     new_edge = [start_vert,end_vert]
-    print("start_vert in graph.getNodes()")
-    print(start_vert in graph.getNodes())
-    print("end_vert in graph.getNodes()")
-    print(end_vert in graph.getNodes())
+#    print("start_vert in graph.getNodes()")
+#    print(start_vert in graph.getNodes())
+#    print("end_vert in graph.getNodes()")
+#    print(end_vert in graph.getNodes())
     return new_edge
 
 def printKeyData(start_vert_to_end_verts):
@@ -292,6 +296,9 @@ def GenRandomGraphNNodes(num_nodes,num_edges):
     #MUST HOLD: num_edges > num_nodes-1
     if num_edges <= num_nodes -1:
         print("Error!  We must have num_edges > num_nodes - 1")
+        return None
+    if num_edges > int((num_nodes)*(num_nodes-1)*0.5):
+        print("Error!  The complete graph on %d nodes has %d edges.  You can not ask for more than that!" % (num_nodes,int((num_nodes)*(num_nodes-1)*0.5)))
         return None
     g = Graph()
     for i in range(num_nodes):
@@ -320,21 +327,274 @@ def GenRandomGraphNNodes(num_nodes,num_edges):
     last_edge_added = None
     for i in range(num_edges-num_nodes+1):
         edge = UniformlyChooseFromPossibleEdgesNotInEdgeSet(verts,edge_set,start_vert_to_end_verts,last_edge_added,g)
-        printEdgeData(edge)
+        #printEdgeData(edge)
         g.addEdgeByNode(edge)
         edge_set.append(edge)
         last_edge_added = edge
-        #crap now that dict has changed
-        #we can't choose with repetition
-        #shit everything needs to be updated
-        #oh wait no we're good
-        #it does that
-        #if I wanted to optimize I really should not construct the dict
-        # start_vert_to_end_verts over and over but rather do it once
-        #then remove stuff as needed
-        #thats a lot of duplicated work
     return g
 
-
+print("Testing! (Note: some of these should produce errors!)")
+print("Generating a random graph with 2 nodes and 0 edges:")
+g = GenRandomGraphNNodes(2,0)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 2 nodes and 1 edges:")
+g = GenRandomGraphNNodes(2,1)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 2 nodes and 2 edges:")
+g = GenRandomGraphNNodes(2,2)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 2 nodes and 3 edges:")
+g = GenRandomGraphNNodes(2,3)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 2 nodes and 4 edges:")
+g = GenRandomGraphNNodes(2,4)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 2 nodes and 5 edges:")
+g = GenRandomGraphNNodes(2,5)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 2 nodes and 6 edges:")
+g = GenRandomGraphNNodes(2,6)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 2 nodes and 7 edges:")
+g = GenRandomGraphNNodes(2,7)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 2 nodes and 8 edges:")
+g = GenRandomGraphNNodes(2,8)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 2 nodes and 9 edges:")
+g = GenRandomGraphNNodes(2,9)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 2 nodes and 10 edges:")
+g = GenRandomGraphNNodes(2,10)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 3 nodes and 0 edges:")
+g = GenRandomGraphNNodes(3,0)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 3 nodes and 1 edges:")
+g = GenRandomGraphNNodes(3,1)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 3 nodes and 2 edges:")
+g = GenRandomGraphNNodes(3,2)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 3 nodes and 3 edges:")
+g = GenRandomGraphNNodes(3,3)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 3 nodes and 4 edges:")
+g = GenRandomGraphNNodes(3,4)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 3 nodes and 5 edges:")
+g = GenRandomGraphNNodes(3,5)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 3 nodes and 6 edges:")
+g = GenRandomGraphNNodes(3,6)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 3 nodes and 7 edges:")
+g = GenRandomGraphNNodes(3,7)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 3 nodes and 8 edges:")
+g = GenRandomGraphNNodes(3,8)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 3 nodes and 9 edges:")
+g = GenRandomGraphNNodes(3,9)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 3 nodes and 10 edges:")
+g = GenRandomGraphNNodes(3,10)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 4 nodes and 0 edges:")
+g = GenRandomGraphNNodes(4,0)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 4 nodes and 1 edges:")
+g = GenRandomGraphNNodes(4,1)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 4 nodes and 2 edges:")
+g = GenRandomGraphNNodes(4,2)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 4 nodes and 3 edges:")
+g = GenRandomGraphNNodes(4,3)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 4 nodes and 4 edges:")
+g = GenRandomGraphNNodes(4,4)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 4 nodes and 5 edges:")
+g = GenRandomGraphNNodes(4,5)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 4 nodes and 6 edges:")
+g = GenRandomGraphNNodes(4,6)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 4 nodes and 7 edges:")
+g = GenRandomGraphNNodes(4,7)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 4 nodes and 8 edges:")
+g = GenRandomGraphNNodes(4,8)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 4 nodes and 9 edges:")
+g = GenRandomGraphNNodes(4,9)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 4 nodes and 10 edges:")
+g = GenRandomGraphNNodes(4,10)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 5 nodes and 0 edges:")
+g = GenRandomGraphNNodes(5,0)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 5 nodes and 1 edges:")
+g = GenRandomGraphNNodes(5,1)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 5 nodes and 2 edges:")
+g = GenRandomGraphNNodes(5,2)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 5 nodes and 3 edges:")
+g = GenRandomGraphNNodes(5,3)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 5 nodes and 4 edges:")
+g = GenRandomGraphNNodes(5,4)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 5 nodes and 5 edges:")
+g = GenRandomGraphNNodes(5,5)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 5 nodes and 6 edges:")
+g = GenRandomGraphNNodes(5,6)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 5 nodes and 7 edges:")
 g = GenRandomGraphNNodes(5,7)
-g.printNodesDataToAdjSet()
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 5 nodes and 8 edges:")
+g = GenRandomGraphNNodes(5,8)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 5 nodes and 9 edges:")
+g = GenRandomGraphNNodes(5,9)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
+print("Generating a random graph with 5 nodes and 10 edges:")
+g = GenRandomGraphNNodes(5,10)
+if g:
+    g.printNodesDataToAdjSet()
+print()
+print()
