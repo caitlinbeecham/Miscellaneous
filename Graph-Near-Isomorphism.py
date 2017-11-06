@@ -214,7 +214,7 @@ class GraphNode(object):
     def getAdj(self):
         return self.adj
 
-    def removeAdjNode(adj_node):
+    def removeAdjNode(self,adj_node):
         self.adj.remove(adj_node)
 
     def addAdjNode(self,node):
@@ -719,6 +719,9 @@ print("checking for node equality, these should all be FALSE")
 for node1 in g.getNodes():
     for node2 in g2.getNodes():
         print(node1 == node2)
+node_to_rem = g2.getNodes()[2]
+g2.removeNode(node_to_rem)
+g2.printNodesDataToAdjSet()
 print("-------------------------------------------")
 print()
 print()
