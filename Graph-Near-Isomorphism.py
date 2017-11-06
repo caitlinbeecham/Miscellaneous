@@ -101,6 +101,20 @@ class Graph(object):
         self.nodes = nodes
         self.num_edges = 0
 
+    def removeNode(self,node):
+        #go to node.adj
+        #for each adj node:
+        #remove node from adj node.adj
+        for itm in node.adj:
+            itm.removeAdjNode(node)
+        self.nodes.remove(node)
+        #####TEST######
+
+    def removeEdge(self,node1,node2):
+        node1.removeAdjNode(node2)
+        node2.removeAdjNode(node1)
+        #####TEST######
+
     def getNodes(self):
         return self.nodes
 
@@ -199,6 +213,9 @@ class GraphNode(object):
 
     def getAdj(self):
         return self.adj
+
+    def removeAdjNode(adj_node):
+        self.adj.remove(adj_node)
 
     def addAdjNode(self,node):
         self.adj.append(node)
