@@ -109,6 +109,10 @@ class Graph(object):
         if new_node not in self.nodes:
             self.nodes.append(new_node)
 
+    def addNodeByNode(self,node):
+        if node not in self.nodes:
+            self.nodes.append(node)
+
     def addEdgeByNode(self,edge):
         #edge is a set of 2 instances of the GraphNode class
         [vert1,vert2] = edge
@@ -133,7 +137,7 @@ class Graph(object):
             node_data_to_adj_node_data[key] = val
         print(node_data_to_adj_node_data)
 
-    def returnCopyWNVertsRemoved(self,n,vert_set = None):
+    def returnCopy(self):
         ##this should return a copy of self with n verts removed
         #it can also take a specific list of verts to remove as input
         #how?
@@ -145,28 +149,44 @@ class Graph(object):
         #could store this data in a hashmap
         #node.data to adj_node.data for adj_node in node.adj
         node_data_to_adj_node_data = dict()
-        node_data_to_node = dict()
-        node_to_node_data = dict()
+        node_data_to_node_in_g1 = dict()
+        node_data_to_node_in_g2 = dict()
+        node_to_node_data_in_g1 = dict()
+        node_to_node_data_in_g2 = dict()
         for node in self.nodes:
+            #self.nodes is g1s nodes
             key = node.data
+            print("key type should be int")
+            print(type(key))
             val = [adj_node.data for adj_node in node.adj]
-            node_data_to_node[key] = None
+            node_data_to_node_in_g1[key] = None
             node_data_to_adj_node_data[key] = val
         #now have data
         #so make new graph with it
         new_graph = Graph()
         for node_data in node_data_to_adj_node_data.keys():
+            print("type(node_data)  should be int")
+            print(type(node_data))
             new_node = GraphNode(node_data)
-            node_data_to_node[node_data] = new_node
-            node_to_node_data[new_node] = node_data
-            new_graph.addNode(new_node)
-        for node in new_graph.getNodes():
+            node_data_to_node_in_g2[node_data] = new_node
+            node_to_node_data_in_g2[new_node] = node_data
+            new_graph.addNodeByNode(new_node)
+        #i see the problem
+        print(" node_data_to_adj_node_data.keys(): ")
+        for node_data in node_data_to_adj_node_data.keys():
+            print(node_data)
+        print()
+        for node in new_graph.nodes:
             #find it's adj node_data
             #then add the appropriate nodes to it's adj list
+            print("current nodes data")
+            print(node.data)
+            print("type of node.data should be int")
+            print(type(node.data))
             adj_node_data = node_data_to_adj_node_data[node.data]
             for adj_node_num in adj_node_data:
-                adj_node = node_data_to_node[adj_node_num]
-                node.addAdj(adj_node)
+                adj_node = node_data_to_node_in_g2[adj_node_num]
+                node.addAdjNode(adj_node)
         return new_graph
         
 
@@ -671,8 +691,18 @@ print()
 print()
 print("Generating a random graph with 5 nodes and 8 edges:")
 g = GenRandomGraphNNodes(5,8)
+print("-------------------------------------------")
+print("these two adj lists should be equal")
 if g:
     g.printNodesDataToAdjSet()
+g2 = g.returnCopy()
+g2.printNodesDataToAdjSet()
+print()
+print("checking for node equality, these should all be FALSE")
+for node1 in g.getNodes():
+    for node2 in g2.getNodes():
+        print(node1 == node2)
+print("-------------------------------------------")
 print()
 print()
 print("Generating a random graph with 5 nodes and 9 edges:")
