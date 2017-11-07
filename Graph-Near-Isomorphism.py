@@ -4,6 +4,11 @@ from datetime import datetime
 
 """
 TODO:
+-test remove edge and remove node methods more
+-write creat adj_matrix method
+    - can first write one that just adds rows and cols at end
+    -then later write one that inserts the empty rows and cols at the right place
+-then write distance method
 1.
 Make set of graphs and then for each graph on that list manually come up
 with some near-isomorphic graphs  (with some verts or edges removed or different edge types)
@@ -105,14 +110,16 @@ class Graph(object):
         #go to node.adj
         #for each adj node:
         #remove node from adj node.adj
-        for itm in node.adj:
-            itm.removeAdjNode(node)
-        self.nodes.remove(node)
+        if node in self.nodes:
+            for itm in node.adj:
+                itm.removeAdjNode(node)
+            self.nodes.remove(node)
         #####TEST######
 
     def removeEdge(self,node1,node2):
-        node1.removeAdjNode(node2)
-        node2.removeAdjNode(node1)
+        if node1 in self.nodes and node2 in self.nodes:
+            node1.removeAdjNode(node2)
+            node2.removeAdjNode(node1)
         #####TEST######
 
     def getNodes(self):
