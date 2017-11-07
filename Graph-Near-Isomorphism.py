@@ -145,7 +145,13 @@ class Graph(object):
         vert2.addAdjNode(vert1)
         self.num_edges += 1
         
-
+    def printNodesAndIncNumbers(self):
+        ret = ""
+        for node in self.nodes:
+            ret += "Node Data: " + str(node.data) + "\n"
+            ret += "Incidence Number: " + str(node.getNumAdj()) + "\n"
+        print(ret)
+            
     #def addEdgeByNodeData():
     def printNodesDataToAdjSet(self):
         node_data_to_adj_node_data = dict()
@@ -209,7 +215,43 @@ class Graph(object):
                 adj_node = node_data_to_node_in_g2[adj_node_num]
                 node.addAdjNode(adj_node)
         return new_graph
+    
+    def sortNodesByIncidenceNumber(self,a=None):
+        #will use mergesort
+        #will sort node list from highest incidence number to lowest
+        new_node_list = []
+        if a == None:
+            a = self.nodes
+        if len(a) == 1:
+            return a
+        else:
+            mid = len(a)//2
+            a1 = a[:mid]
+            a2 = a[mid:]
+            ret = MergeNodeLists(self.sortNodesByIncidenceNumber(a1),self.sortNodesByIncidenceNumber(a2))
+            self.nodes = ret
+            return ret
         
+def MergeNodeLists(a1,a2):
+    #a1 and a2 are a list of nodes
+    i1 = 0
+    i2 = 0
+    ret = []
+    while i1 < len(a1) and i2 < len(a2):
+        if a1[i1].getNumAdj() > a2[i2].getNumAdj():
+            ret.append(a1[i1])
+            i1 += 1
+        else:
+            ret.append(a2[i2])
+            i2 += 1
+    while i1 < len(a1):
+        ret.append(a1[i1])
+        i1 += 1
+    while i2 < len(a2):
+        ret.append(a2[i2])
+        i2 += 1
+    return ret
+
 
 class GraphNode(object):
     def __init__(self,data,adj=None):
@@ -217,6 +259,9 @@ class GraphNode(object):
             adj = []
         self.data = data
         self.adj = adj
+
+    def getNumAdj(self):
+        return len(self.adj)
 
     def getAdj(self):
         return self.adj
@@ -708,11 +753,17 @@ if g:
     g.printNodesDataToAdjSet()
 print()
 print()
+print("---------------------------")
 print("Generating a random graph with 5 nodes and 7 edges:")
 g = GenRandomGraphNNodes(5,7)
 if g:
     g.printNodesDataToAdjSet()
+    g.printNodesAndIncNumbers()
 print()
+print("SORTING NODES BY INCIDENCE NUMBER")
+g.sortNodesByIncidenceNumber()
+g.printNodesDataToAdjSet()
+g.printNodesAndIncNumbers()
 print()
 print("Generating a random graph with 5 nodes and 8 edges:")
 g = GenRandomGraphNNodes(5,8)
