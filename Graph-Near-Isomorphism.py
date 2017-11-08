@@ -597,6 +597,7 @@ def runTestCase(num_nodes,num_edges):
                 found = True
                 #g2 = g.returnCopy()
                 g2.removeEdge(node1,node2)
+                """
                 print("node1 in g.getNodes()  ... should be true")
                 print(node1 in g.getNodes())
                 print("node1.data")
@@ -605,13 +606,14 @@ def runTestCase(num_nodes,num_edges):
                 print(node2 in g.getNodes())
                 print("node2.data")
                 print(node2.data)
+                """
                 print("node data to adj data for g2")
                 g2.printNodesDataToAdjSet()
         found = False
         while not found:
             randidx1 = randint(0,len(g2.getNodes())-1)
             randidx2 = randint(0,len(g2.getNodes())-1)
-            g3 = g.returnCopy()
+            g3 = g2.returnCopy()
             node1 = g3.getNodes()[randidx1]
             node2 = g3.getNodes()[randidx2]
             if node2 in node1.getAdj():
