@@ -3,6 +3,17 @@ from copy import deepcopy
 from datetime import datetime
 
 """
+NOTE THIS IS FOR AN UNWEIGHTED GRAPH UNDIRECTED
+TODO:
+write analogous code for weighted directed graph
+in this code would be good to have the adjacency matrix as a class variable
+also might want to keep the node list sorted by adj number as go as much as possible
+maybe not but its an idea
+(maybe not because the incidence number could change as edges are added)
+so if it is rare for an edge to be added after a vertex has been added then should
+keep the node list sorted by adj number as add them
+otherwise dont and just sort before calling the distance metric
+
 TODO:
 -test remove edge and remove node methods more
 -write creat adj_matrix method
@@ -144,6 +155,19 @@ class Graph(object):
         vert1.addAdjNode(vert2)
         vert2.addAdjNode(vert1)
         self.num_edges += 1
+
+    def constructAdjMatrix(self):
+        self.sortNodesByIncidenceNumber()
+        adj_matrix = [[0 for node1 in self.nodes] for node2 in self.nodes]
+        for i in range(len(self.nodes)-1):
+            for j in range(i,len(self.nodes)):
+                if self.nodes[j] in self.nodes[i].getAdj():
+                    adj_matrix[i][j] = 1
+                    adj_matrix[j][i] = 1
+        return adj_matrix
+
+    #def constructIncidenceNumberToNodes(self):
+        #grouping  the nodes by incidence number and creating a hashmap
         
     def printNodesAndIncNumbers(self):
         ret = ""
@@ -509,8 +533,39 @@ def returnAdjMatrixDistance(g1,g2):
     RELATED IDEA:  could try defining the edge weight distance between a null node and it's
     corresponding node in the other graph to be different constants then test and use
     the one that gives us the right distance for our near isomorphism problem
+    #note: might want to scale this ie take the AVERAGE sqaure dist
     """
-    
+    a1 = g1.constructAdjMatrix()
+    a2 = g2.constructAdjMatrix()
+    #need to even out lengths
+    #for now just add rows and cols to the smaller one at the end
+    if len(a1) < len(a2):
+        #by the way these are both square
+        row_diff = len(a2) - len(a1)
+        for i in range(len(a1)):
+            for j in range(row_diff):
+                #NOTE COULD CHANGE THIS VALUE DEPENDING ON TESTING
+                a1[i].append(0)
+        #IF CHANGE CHANGE HERE TOO
+        new_row = [0 for i in range(len(a2))]
+        for i in range(row_diff):
+            a1.append(new_row)
+    elif len(a2) < len(a1):
+        row_diff = len(a1) - len(a2)
+        for i in range(len(a2)):
+            for j in range(row_diff):
+                #NOTE COULD CHANGE THIS VALUE DEPENDING ON TESTING
+                a2[i].append(0)
+        #IF CHANGE CHANGE HERE TOO
+        new_row = [0 for i in range(len(a1))]
+        for i in range(row_diff):
+            a2.append(new_row)
+    diff_sum = 0
+    for i in range(len(a1)-1):
+        for j in range(i,len(a1[i])):
+            diff_sum += (a2[i][j] - a1[i][j])**2
+    diff_av = diff_sum/(0.5*len(a1)**2)
+    return diff_av
 
 print("Testing! (Note: some of these should produce errors!)")
 print("Generating a random graph with 2 nodes and 0 edges:")
@@ -786,6 +841,19 @@ node2 = g2.getNodes()[2]
 g2.removeEdge(node1,node2)
 g2.removeEdge(node1,node1)
 g2.printNodesDataToAdjSet()
+g3 = g2.returnCopy()
+nodea = g3.getNodes()[0]
+nodeb = g3.getNodes()[1]
+g3.removeEdge(nodea,nodeb)
+g3.printNodesDataToAdjSet()
+print("adj matrix dist between g and itself")
+print(returnAdjMatrixDistance(g,g))
+print("adj matrix dist between g and g2")
+print(returnAdjMatrixDistance(g,g2))
+print("adj matrix dist between g2 and g3")
+print(returnAdjMatrixDistance(g3,g2))
+print("adj matrix dist between g and g3")
+print(returnAdjMatrixDistance(g3,g))
 print("-------------------------------------------")
 print()
 print()
