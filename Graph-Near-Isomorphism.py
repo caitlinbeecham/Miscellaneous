@@ -207,8 +207,8 @@ class Graph(object):
         for node in self.nodes:
             #self.nodes is g1s nodes
             key = node.data
-            print("key type should be int")
-            print(type(key))
+            #print("key type should be int")
+            #print(type(key))
             val = [adj_node.data for adj_node in node.adj]
             node_data_to_node_in_g1[key] = None
             node_data_to_adj_node_data[key] = val
@@ -216,24 +216,24 @@ class Graph(object):
         #so make new graph with it
         new_graph = Graph()
         for node_data in node_data_to_adj_node_data.keys():
-            print("type(node_data)  should be int")
-            print(type(node_data))
+            #print("type(node_data)  should be int")
+            #print(type(node_data))
             new_node = GraphNode(node_data)
             node_data_to_node_in_g2[node_data] = new_node
             node_to_node_data_in_g2[new_node] = node_data
             new_graph.addNodeByNode(new_node)
         #i see the problem
-        print(" node_data_to_adj_node_data.keys(): ")
-        for node_data in node_data_to_adj_node_data.keys():
-            print(node_data)
-        print()
+        #print(" node_data_to_adj_node_data.keys(): ")
+        #for node_data in node_data_to_adj_node_data.keys():
+#            print(node_data)
+#        print()
         for node in new_graph.nodes:
             #find it's adj node_data
             #then add the appropriate nodes to it's adj list
-            print("current nodes data")
-            print(node.data)
-            print("type of node.data should be int")
-            print(type(node.data))
+            #print("current nodes data")
+            #print(node.data)
+            #print("type of node.data should be int")
+            #print(type(node.data))
             adj_node_data = node_data_to_adj_node_data[node.data]
             for adj_node_num in adj_node_data:
                 adj_node = node_data_to_node_in_g2[adj_node_num]
@@ -480,6 +480,9 @@ def printEdgeData(edge):
 
 def GenRandomGraphNNodes(num_nodes,num_edges):
     #MUST HOLD: num_edges > num_nodes-1
+    if num_nodes < 1:
+        print("Error!  We need at least 1 node!")
+        return None
     if num_edges <= num_nodes -1:
         print("Error!  We must have num_edges > num_nodes - 1")
         return None
@@ -567,7 +570,97 @@ def returnAdjMatrixDistance(g1,g2):
     diff_av = diff_sum/(0.5*len(a1)**2)
     return diff_av
 
+def runTestCase(num_nodes,num_edges):
+    ###
+    """
+    generates a graph, makes a copy with one edge removed, makes a copy of that with
+    2 edges removed
+    looks at distances between them
+    from the starting graph, makes a copy and removes a node, then makes
+    a copy of that and removes a second node
+    reports distances
+    """
+    ###
+    print("----------TEST CASE WITH %d nodes and %d edges: --------" % (num_nodes,num_edges))
+    g = GenRandomGraphNNodes(num_nodes,num_edges)
+    if g:
+        print("node data to adj data for g")
+        g.printNodesDataToAdjSet()
+        found = False
+        while not found:
+            randidx1 = randint(0,len(g.getNodes())-1)
+            randidx2 = randint(0,len(g.getNodes())-1)
+            g2 = g.returnCopy()
+            node1 = g2.getNodes()[randidx1]
+            node2 = g2.getNodes()[randidx2]
+            if (node2 in node1.getAdj()) and (node1 in node2.getAdj()):
+                found = True
+                #g2 = g.returnCopy()
+                g2.removeEdge(node1,node2)
+                print("node1 in g.getNodes()  ... should be true")
+                print(node1 in g.getNodes())
+                print("node1.data")
+                print(node1.data)
+                print("node2 in g.getNodes()  ... should be true")
+                print(node2 in g.getNodes())
+                print("node2.data")
+                print(node2.data)
+                print("node data to adj data for g2")
+                g2.printNodesDataToAdjSet()
+        found = False
+        while not found:
+            randidx1 = randint(0,len(g2.getNodes())-1)
+            randidx2 = randint(0,len(g2.getNodes())-1)
+            g3 = g.returnCopy()
+            node1 = g3.getNodes()[randidx1]
+            node2 = g3.getNodes()[randidx2]
+            if node2 in node1.getAdj():
+                found = True
+                g3.removeEdge(node1,node2)
+                print("node data to adj data for g3")
+                g3.printNodesDataToAdjSet()
+        randidx1 = randint(0,len(g.getNodes())-1)
+        g4 = g.returnCopy()
+        node1 = g4.getNodes()[randidx1]
+        g4.removeNode(node1)
+        print("node data to adj data for g4")
+        g4.printNodesDataToAdjSet()
+        randidx1 = randint(0,len(g4.getNodes())-1)
+        g5 = g4.returnCopy()
+        node1 = g5.getNodes()[randidx1]
+        g5.removeNode(node1)
+        print("node data to adj data for g5")
+        g5.printNodesDataToAdjSet()
+        print("g2 is g with one edge removed")
+        print("g3 is g with two edges removed")
+        print("g4 is g with one node removed")
+        print("g5 is g with two nodes removed")
+        print("Dist between g and g2:")
+        print(returnAdjMatrixDistance(g,g2))
+        print("Dist between g2 and g3:")
+        print(returnAdjMatrixDistance(g2,g3))
+        print("Dist between g and g3:")
+        print(returnAdjMatrixDistance(g,g3))
+        print("Dist between g and g4:")
+        print(returnAdjMatrixDistance(g,g4))
+        print("Dist between g4 and g5:")
+        print(returnAdjMatrixDistance(g4,g5))
+        print("Dist between g and g5:")
+        print(returnAdjMatrixDistance(g,g5))
+        print("Dist between g3 and g4:")
+        print(returnAdjMatrixDistance(g3,g5))
+        print("Dist between g4 and g5:")
+        print(returnAdjMatrixDistance(g4,g5))
+    print()
+    print()
+    print()
+
 print("Testing! (Note: some of these should produce errors!)")
+for num_nodes in range(2,5):
+    max_num_edges = int(num_nodes*(num_nodes-1)*0.5)
+    for num_edges in range(max_num_edges + 1):
+        runTestCase(num_nodes,num_edges)
+"""
 print("Generating a random graph with 2 nodes and 0 edges:")
 g = GenRandomGraphNNodes(2,0)
 if g:
@@ -869,3 +962,4 @@ if g:
     g.printNodesDataToAdjSet()
 print()
 print()
+"""
