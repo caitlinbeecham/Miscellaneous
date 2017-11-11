@@ -16,16 +16,16 @@ otherwise dont and just sort before calling the distance metric
 
 TODO:
 -test remove edge and remove node methods more
--write creat adj_matrix method
-    - can first write one that just adds rows and cols at end
-    -then later write one that inserts the empty rows and cols at the right place
--then write distance method
+
+-maybe come up with new random graph generation algorithm, the current one
+-generates a graph with at least one cycle, could make a complete freeform one
+
 1.
 Make set of graphs and then for each graph on that list manually come up
 with some near-isomorphic graphs  (with some verts or edges removed or different edge types)
 2.
-then try out my new distance metric!
-should give 0 dist if exactly isomorphic
+then try out my new distance metric! CHECK 
+should give 0 dist if exactly isomorphic (has so far, but should try reordering the nodes and checking if isomorphic)
 (though if have metric that gives say always a dist <0.15 if isomorphic,)
 (could offset our distance metric just to have this hold, or could not have this hold)
 if has 2 edges removed should have greater dist than graph with 1 edge removed
@@ -139,8 +139,8 @@ class Graph(object):
             self.node_to_node_idx[new_node] = node_idx
             #add col to self.adj_matrix
             for row in self.adj_matrix:
-                row.append([None,None])
-            new_row = [[None,None] for node in self.nodes]
+                row.append([0,None])
+            new_row = [[0,None] for node in self.nodes]
             self.adj_matrix.append(new_row)
         ######TODO TEST########
 
@@ -152,8 +152,8 @@ class Graph(object):
             self.node_to_node_idx[node] = node_idx
             #add col to self.adj_matrix
             for row in self.adj_matrix:
-                row.append([None,None])
-            new_row = [[None,None] for itm in self.nodes]
+                row.append([0,None])
+            new_row = [[0,None] for itm in self.nodes]
             self.adj_matrix.append(new_row)
 
     def addEdgeByNode(self,edge):
@@ -509,16 +509,27 @@ def GenRandomGraphNNodes(num_nodes,num_edges):
         print("Error!  The complete graph on %d nodes has %d edges.  You can not ask for more than that!" % (num_nodes,int((num_nodes)*(num_nodes-1)*0.5)))
         return None
     g = Graph()
+    print("Just created graph...")
     for i in range(num_nodes):
+        print("adding node")
+        print("g.adj_matrix before")
+        print(g.adj_matrix)
         g.addNode(i)
+        print("g.adj_matrix after")
+        print(g.adj_matrix)
     verts = g.getNodes()
     random_perm = uniformly_chosen_perm_of_verts(verts)
     edge_set = []
     for i in range(len(random_perm)-1):
         start_vert = random_perm[i]
         end_vert = random_perm[i+1]
+        print("adding edge")
+        print("g.adj_matrix before")
+        print(g.adj_matrix)
         edge = [start_vert,end_vert]
         g.addEdgeByNode(edge)
+        print("g.adj_matrix after")
+        print(g.adj_matrix)
         edge_set.append(edge)
     start_vert_to_end_verts = constructPossibleStartVertsAndEndVertsExludingSomeEdgeSet(verts,edge_set)
     last_edge_added = None
@@ -529,7 +540,7 @@ def GenRandomGraphNNodes(num_nodes,num_edges):
         last_edge_added = edge
     return g
 
-def returnAdjMatrixDistance(g1,g2):
+def returnAdjMatrixEdgeLengthDistance(g1,g2):
     """
     NOTE:  my idea for sorting by incidence number then trying all reorderings
     within chains of verts w same incidence number works perfectly
@@ -545,8 +556,10 @@ def returnAdjMatrixDistance(g1,g2):
     the one that gives us the right distance for our near isomorphism problem
     #note: might want to scale this ie take the AVERAGE sqaure dist
     """
-    a1 = g1.constructAdjMatrix()
-    a2 = g2.constructAdjMatrix()
+    #a1 = g1.constructAdjMatrix()
+    #a2 = g2.constructAdjMatrix()
+    a1 = g1.adj_matrix
+    a2 = g2.adj_matrix
     #need to even out lengths
     #for now just add rows and cols to the smaller one at the end
     if len(a1) < len(a2):
@@ -565,15 +578,19 @@ def returnAdjMatrixDistance(g1,g2):
         for i in range(len(a2)):
             for j in range(row_diff):
                 #NOTE COULD CHANGE THIS VALUE DEPENDING ON TESTING
-                a2[i].append(0)
+                a2[i].append([0,None])
         #IF CHANGE CHANGE HERE TOO
-        new_row = [0 for i in range(len(a1))]
+        new_row = [[0,None] for i in range(len(a1))]
         for i in range(row_diff):
             a2.append(new_row)
     diff_sum = 0
+    #print("a1")
+    #print(a1)
+    #print("a2")
+    #print(a2)
     for i in range(len(a1)-1):
-        for j in range(i,len(a1[i])):
-            diff_sum += (a2[i][j] - a1[i][j])**2
+        for j in range(i+1,len(a1[i])):
+            diff_sum += (a2[i][j][0] - a1[i][j][0])**2
     diff_av = diff_sum/(0.5*len(a1)**2)
     return diff_av
 
@@ -635,19 +652,19 @@ def runTestCase(num_nodes,num_edges):
         print("g4 is g with one node removed")
         print("g5 is g with two nodes removed")
         print("Dist between g and g2:")
-        print(returnAdjMatrixDistance(g,g2))
+        print(returnAdjMatrixEdgeLengthDistance(g,g2))
         print("Dist between g2 and g3:")
-        print(returnAdjMatrixDistance(g2,g3))
+        print(returnAdjMatrixEdgeLengthDistance(g2,g3))
         print("Dist between g and g3:")
-        print(returnAdjMatrixDistance(g,g3))
+        print(returnAdjMatrixEdgeLengthDistance(g,g3))
         print("Dist between g and g4:")
-        print(returnAdjMatrixDistance(g,g4))
+        print(returnAdjMatrixEdgeLengthDistance(g,g4))
         print("Dist between g4 and g5:")
-        print(returnAdjMatrixDistance(g4,g5))
+        print(returnAdjMatrixEdgeLengthDistance(g4,g5))
         print("Dist between g and g5:")
-        print(returnAdjMatrixDistance(g,g5))
+        print(returnAdjMatrixEdgeLengthDistance(g,g5))
         print("Dist between g3 and g4:")
-        print(returnAdjMatrixDistance(g3,g5))
+        print(returnAdjMatrixEdgeLengthDistance(g3,g5))
     print()
     print()
     print()
